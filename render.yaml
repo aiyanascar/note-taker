@@ -2,6 +2,5 @@ services:
   - type: web
     name: note-taker
     env: node
-    plan: free
-    buildCommand: 'npm install'
-    startCommand: 'node server.js'
+    buildCommand: npm install
+    startCommand: npm start
