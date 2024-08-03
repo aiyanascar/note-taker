@@ -14,11 +14,41 @@ document.addEventListener('DOMContentLoaded', (event) => {
   
     let activeNote = {};
   
-    const getNotes = () => fetch(apiUrl, { method: 'GET', headers: { 'Content-Type': 'application/json' } });
+    const getNotes = () => {
+      return fetch(apiUrl, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then((response) => {
+          if (response.ok) {
+            return response.json();
+          } else {
+            throw new Error('Failed to fetch notes');
+          }
+        })
+        .catch((error) => {
+          console.error('Error fetching notes:', error);
+          throw error;
+        });
+    };
   
-    const saveNote = (note) => fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(note) });
+    const saveNote = (note) => {
+      console.log('Saving note:', note); // Log the note being saved
+      return fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(note) })
+        .then((response) => {
+          if (response.ok) {
+            return response.json();
+          } else {
+            throw new Error('Failed to save note');
+          }
+        });
+    };
   
-    const deleteNote = (id) => fetch(`${apiUrl}/${id}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' } });
+    const deleteNote = (id) => {
+      return fetch(`${apiUrl}/${id}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' } })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error('Failed to delete note');
+          }
+        });
+    };
   
     const renderActiveNote = () => {
       hide(saveNoteBtn);
@@ -41,10 +71,16 @@ document.addEventListener('DOMContentLoaded', (event) => {
   
     const handleNoteSave = () => {
       const newNote = { title: noteTitle.value, text: noteText.value };
-      saveNote(newNote).then(() => {
-        getAndRenderNotes();
-        renderActiveNote();
-      });
+      console.log('Attempting to save new note:', newNote); // Log the new note before saving
+      saveNote(newNote)
+        .then((data) => {
+          console.log('Note saved:', data); // Log the saved note data
+          getAndRenderNotes();
+          renderActiveNote();
+        })
+        .catch((error) => {
+          console.error('Error saving note:', error);
+        });
     };
   
     const handleNoteDelete = (e) => {
@@ -57,10 +93,14 @@ document.addEventListener('DOMContentLoaded', (event) => {
         activeNote = {};
       }
   
-      deleteNote(noteId).then(() => {
-        getAndRenderNotes();
-        renderActiveNote();
-      });
+      deleteNote(noteId)
+        .then(() => {
+          getAndRenderNotes();
+          renderActiveNote();
+        })
+        .catch((error) => {
+          console.error('Error deleting note:', error);
+        });
     };
   
     const handleNoteView = (e) => {
@@ -87,7 +127,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
     };
   
     const renderNoteList = async (notes) => {
-      let jsonNotes = await notes.json();
+      let jsonNotes = await notes;
+      console.log('Fetched notes:', jsonNotes); // Log the fetched notes
       noteList.innerHTML = '';
   
       let noteListItems = [];
@@ -127,10 +168,15 @@ document.addEventListener('DOMContentLoaded', (event) => {
       noteListItems.forEach((note) => noteList.append(note));
     };
   
-    const getAndRenderNotes = () => getNotes().then(renderNoteList);
+    const getAndRenderNotes = () => getNotes().then(renderNoteList).catch((error) => {
+      console.error('Error fetching notes:', error);
+    });
   
     saveNoteBtn.addEventListener('click', handleNoteSave);
     newNoteBtn.addEventListener('click', handleNewNoteView);
     clearBtn.addEventListener('click', renderActiveNote);
-    noteForm.addEventListener('
+    noteForm.addEventListener('input', handleRenderBtns);
+  
+    getAndRenderNotes();
+  });
   

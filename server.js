@@ -10,19 +10,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-// HTML Routes
-app.get('/notes', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/notes.html'));
-});
-
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/index.html'));
-});
-
 // API Routes
 app.get('/api/notes', (req, res) => {
   fs.readFile(path.join(__dirname, 'db/db.json'), 'utf8', (err, data) => {
     if (err) {
+      console.error('Error reading notes data:', err);
       return res.status(500).json({ error: 'Failed to read notes data' });
     }
     res.json(JSON.parse(data));
@@ -31,17 +23,20 @@ app.get('/api/notes', (req, res) => {
 
 app.post('/api/notes', (req, res) => {
   const newNote = { id: uuidv4(), ...req.body };
-  
+  console.log('New note received:', newNote); // Log the new note received by the server
+
   fs.readFile(path.join(__dirname, 'db/db.json'), 'utf8', (err, data) => {
     if (err) {
+      console.error('Error reading notes data:', err);
       return res.status(500).json({ error: 'Failed to read notes data' });
     }
-    
+
     const notes = JSON.parse(data);
     notes.push(newNote);
 
     fs.writeFile(path.join(__dirname, 'db/db.json'), JSON.stringify(notes, null, 2), (err) => {
       if (err) {
+        console.error('Error saving note:', err);
         return res.status(500).json({ error: 'Failed to save note' });
       }
       res.json(newNote);
@@ -54,6 +49,7 @@ app.delete('/api/notes/:id', (req, res) => {
 
   fs.readFile(path.join(__dirname, 'db/db.json'), 'utf8', (err, data) => {
     if (err) {
+      console.error('Error reading notes data:', err);
       return res.status(500).json({ error: 'Failed to read notes data' });
     }
 
@@ -62,11 +58,21 @@ app.delete('/api/notes/:id', (req, res) => {
 
     fs.writeFile(path.join(__dirname, 'db/db.json'), JSON.stringify(notes, null, 2), (err) => {
       if (err) {
+        console.error('Error deleting note:', err);
         return res.status(500).json({ error: 'Failed to delete note' });
       }
       res.json({ message: 'Note deleted' });
     });
   });
+});
+
+// HTML Routes
+app.get('/notes', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/notes.html'));
+});
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/index.html'));
 });
 
 // Start the server
