@@ -132,8 +132,5 @@ document.addEventListener('DOMContentLoaded', (event) => {
     saveNoteBtn.addEventListener('click', handleNoteSave);
     newNoteBtn.addEventListener('click', handleNewNoteView);
     clearBtn.addEventListener('click', renderActiveNote);
-    noteForm.addEventListener('input', handleRenderBtns);
-  
-    getAndRenderNotes();
-  });
+    noteForm.addEventListener('
   
