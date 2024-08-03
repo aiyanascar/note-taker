@@ -5,6 +5,10 @@ body {
   padding: 0;
 }
 
+.navbar {
+  margin-bottom: 10px;
+}
+
 .save-note, .new-note, .clear-btn {
   display: none;
 }
